@@ -1,30 +1,56 @@
 {
   "expo": {
-    "name": "my-dashboard-mobile",
+    "name": "My Dashboard",
     "slug": "my-dashboard-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "mydashboard",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2563eb"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mydashboard.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to show you on the map.",
+        "NSLocationAlwaysUsageDescription": "We need your location to show you on the map."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2563eb"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "package": "com.mydashboard.mobile",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#2563eb"
+        }
+      ]
+    ],
+    "extra": {
+      "apiBaseUrl": "",
+      "eas": {
+        "projectId": ""
+      }
     }
   }
 }
