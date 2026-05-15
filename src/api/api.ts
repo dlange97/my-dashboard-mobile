@@ -1,5 +1,5 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import * as SecureStore from "expo-secure-store";
 import type {
   LoginResponse,
   User,
@@ -8,6 +8,7 @@ import type {
   AppEvent,
   MapRoute,
   MapPoint,
+  Note,
   InboxResponse,
   InboxNotification,
   RoleDefinition,
@@ -17,17 +18,17 @@ import type {
   PaginatedResponse,
   ShareableUser,
   Instance,
-} from '../types';
+} from "../types";
 
-const TOKEN_KEY = 'dashboard_token';
-const INSTANCE_KEY = 'dashboard_instance_id';
+const TOKEN_KEY = "dashboard_token";
+const INSTANCE_KEY = "dashboard_instance_id";
 
 // Base URL is configurable via env; set EXPO_PUBLIC_API_URL in .env
-const API_BASE = (process.env.EXPO_PUBLIC_API_URL ?? '').replace(/\/$/, '');
+const API_BASE = (process.env.EXPO_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
 const client = axios.create({
   baseURL: API_BASE,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { "Content-Type": "application/json" },
   timeout: 15000,
 });
 
@@ -40,7 +41,7 @@ client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   if (instanceId) {
-    config.headers['X-Instance-Id'] = instanceId;
+    config.headers["X-Instance-Id"] = instanceId;
   }
   return config;
 });
@@ -71,11 +72,18 @@ function extractData<T>(resp: { data: T }): T {
 
 function extractError(error: unknown): never {
   if (error instanceof AxiosError) {
-    const data = error.response?.data as Record<string, unknown> | undefined;
+    // No response → network-level failure (wrong URL, server down, no .env, etc.)
+    if (!error.response) {
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? "(not set)";
+      throw new Error(
+        `Cannot reach server at ${apiUrl}. Check your .env EXPO_PUBLIC_API_URL and ensure the backend is running.`,
+      );
+    }
+    const data = error.response.data as Record<string, unknown> | undefined;
     const message =
       (data?.error as string) ??
       (data?.message as string) ??
-      `HTTP ${error.response?.status}: ${error.response?.statusText}`;
+      `HTTP ${error.response.status}: ${error.response.statusText}`;
     throw new Error(message);
   }
   throw error;
@@ -104,9 +112,24 @@ async function del<T = null>(path: string): Promise<T> {
 // ── Shopping Lists ──────────────────────────────────────────────────────
 
 export const api = {
-  getLists: () => get<ShoppingList[]>('/dashboard/shopping-lists'),
+  // ── Notes ─────────────────────────────────────────────────────────────
+
+  getNotes: () => get<Note[]>("/dashboard/notes"),
+  createNote: (payload: { title: string; content: string; color?: string }) =>
+    post<Note>("/dashboard/notes", payload),
+  updateNote: (
+    id: number,
+    payload: { title?: string; content?: string; color?: string },
+  ) => patch<Note>(`/dashboard/notes/${id}`, payload),
+  deleteNote: (id: number) => del(`/dashboard/notes/${id}`),
+  shareNote: (id: number, userId: string) =>
+    post<Note>(`/dashboard/notes/${id}/share`, { userId }),
+  unshareNote: (id: number, userId: string) =>
+    del(`/dashboard/notes/${id}/share/${encodeURIComponent(userId)}`),
+
+  getLists: () => get<ShoppingList[]>("/dashboard/shopping-lists"),
   createList: (payload: { name: string }) =>
-    post<ShoppingList>('/dashboard/shopping-lists', payload),
+    post<ShoppingList>("/dashboard/shopping-lists", payload),
   updateList: (id: string, payload: { name: string }) =>
     put<ShoppingList>(`/dashboard/shopping-lists/${id}`, payload),
   updateListStatus: (id: string, status: string) =>
@@ -123,9 +146,9 @@ export const api = {
 
   // ── Todos ───────────────────────────────────────────────────────────
 
-  getTodos: () => get<TodoItem[]>('/dashboard/todos'),
+  getTodos: () => get<TodoItem[]>("/dashboard/todos"),
   createTodo: (payload: { text: string; dueDate?: string | null }) =>
-    post<TodoItem>('/dashboard/todos', payload),
+    post<TodoItem>("/dashboard/todos", payload),
   toggleTodo: (id: string) => patch<TodoItem>(`/dashboard/todos/${id}/toggle`),
   updateTodo: (id: string, payload: Partial<TodoItem>) =>
     patch<TodoItem>(`/dashboard/todos/${id}`, payload),
@@ -137,9 +160,9 @@ export const api = {
 
   // ── Events ──────────────────────────────────────────────────────────
 
-  getEvents: () => get<AppEvent[]>('/events'),
+  getEvents: () => get<AppEvent[]>("/events"),
   createEvent: (payload: Partial<AppEvent>) =>
-    post<AppEvent>('/events', payload),
+    post<AppEvent>("/events", payload),
   updateEvent: (id: string, payload: Partial<AppEvent>) =>
     put<AppEvent>(`/events/${id}`, payload),
   deleteEvent: (id: string) => del(`/events/${id}`),
@@ -150,20 +173,20 @@ export const api = {
 
   // ── Routes ──────────────────────────────────────────────────────────
 
-  getRoutes: () => get<MapRoute[]>('/events/routes'),
+  getRoutes: () => get<MapRoute[]>("/events/routes"),
   getRoutesByEvent: (eventId: string) =>
     get<MapRoute[]>(`/events/routes/event/${eventId}`),
   createRoute: (payload: Partial<MapRoute>) =>
-    post<MapRoute>('/events/routes', payload),
+    post<MapRoute>("/events/routes", payload),
   updateRoute: (id: string, payload: Partial<MapRoute>) =>
     put<MapRoute>(`/events/routes/${id}`, payload),
   deleteRoute: (id: string) => del(`/events/routes/${id}`),
 
   // ── Map Points ──────────────────────────────────────────────────────
 
-  getMapPoints: () => get<MapPoint[]>('/events/points'),
+  getMapPoints: () => get<MapPoint[]>("/events/points"),
   createMapPoint: (payload: Partial<MapPoint>) =>
-    post<MapPoint>('/events/points', payload),
+    post<MapPoint>("/events/points", payload),
   updateMapPoint: (id: string, payload: Partial<MapPoint>) =>
     patch<MapPoint>(`/events/points/${id}`, payload),
   deleteMapPoint: (id: string) => del(`/events/points/${id}`),
@@ -171,37 +194,46 @@ export const api = {
   // ── Auth ────────────────────────────────────────────────────────────
 
   login: (email: string, password: string) =>
-    post<LoginResponse>('/auth/login', { email, password }),
-  register: (email: string, password: string, firstName: string, lastName: string) =>
-    post('/auth/register', { email, password, firstName, lastName }),
+    post<LoginResponse>("/auth/login", { email, password }),
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ) => post("/auth/register", { email, password, firstName, lastName }),
   requestAccess: (payload: {
     email: string;
     firstName?: string;
     lastName?: string;
     message?: string;
-  }) => post('/auth/request-access', payload),
-  me: () => get<{ user: User }>('/auth/me'),
+  }) => post("/auth/request-access", payload),
+  me: () => get<{ user: User }>("/auth/me"),
 
   // ── Users ───────────────────────────────────────────────────────────
 
-  getUsers: (params: { page?: number; perPage?: number; search?: string } = {}) => {
+  getUsers: (
+    params: { page?: number; perPage?: number; search?: string } = {},
+  ) => {
     const p = new URLSearchParams();
-    p.set('page', String(params.page ?? 1));
-    p.set('perPage', String(params.perPage ?? 10));
-    if (params.search?.trim()) p.set('search', params.search.trim());
+    p.set("page", String(params.page ?? 1));
+    p.set("perPage", String(params.perPage ?? 10));
+    if (params.search?.trim()) p.set("search", params.search.trim());
     return get<PaginatedResponse<User>>(`/auth/users?${p.toString()}`);
   },
-  getShareableUsers: (params: { page?: number; perPage?: number; search?: string } = {}) => {
+  getShareableUsers: (
+    params: { page?: number; perPage?: number; search?: string } = {},
+  ) => {
     const p = new URLSearchParams();
-    p.set('page', String(params.page ?? 1));
-    p.set('perPage', String(params.perPage ?? 25));
-    if (params.search?.trim()) p.set('search', params.search.trim());
+    p.set("page", String(params.page ?? 1));
+    p.set("perPage", String(params.perPage ?? 25));
+    if (params.search?.trim()) p.set("search", params.search.trim());
     return get<PaginatedResponse<ShareableUser> | ShareableUser[]>(
       `/auth/users/options?${p.toString()}`,
     );
   },
   getUserById: (userId: string) => get<User>(`/auth/users/${userId}`),
-  createUser: (payload: Record<string, unknown>) => post<User>('/auth/users', payload),
+  createUser: (payload: Record<string, unknown>) =>
+    post<User>("/auth/users", payload),
   updateUser: (userId: string, payload: Record<string, unknown>) =>
     patch<User>(`/auth/users/${userId}`, payload),
   deleteUser: (userId: string) => del(`/auth/users/${userId}`),
@@ -210,12 +242,14 @@ export const api = {
 
   // ── Access Settings ─────────────────────────────────────────────────
 
-  getAccessSettings: () => get<Record<string, unknown>>('/auth/settings/access'),
-  getJwtSessionSettings: () => get<JwtSessionSetting[]>('/auth/settings/jwt-session'),
+  getAccessSettings: () =>
+    get<Record<string, unknown>>("/auth/settings/access"),
+  getJwtSessionSettings: () =>
+    get<JwtSessionSetting[]>("/auth/settings/jwt-session"),
   getJwtSessionSetting: (id: string) =>
     get<JwtSessionSetting>(`/auth/settings/jwt-session/${id}`),
   createJwtSessionSetting: (payload: Partial<JwtSessionSetting>) =>
-    post<JwtSessionSetting>('/auth/settings/jwt-session', payload),
+    post<JwtSessionSetting>("/auth/settings/jwt-session", payload),
   updateJwtSessionSetting: (id: string, payload: Partial<JwtSessionSetting>) =>
     patch<JwtSessionSetting>(`/auth/settings/jwt-session/${id}`, payload),
   deleteJwtSessionSetting: (id: string) =>
@@ -223,56 +257,68 @@ export const api = {
 
   // ── Roles ───────────────────────────────────────────────────────────
 
-  getRoles: () => get<RoleDefinition[]>('/auth/roles'),
+  getRoles: () => get<RoleDefinition[]>("/auth/roles"),
   createRole: (payload: Partial<RoleDefinition>) =>
-    post<RoleDefinition>('/auth/roles', payload),
+    post<RoleDefinition>("/auth/roles", payload),
   updateRole: (id: string, payload: Partial<RoleDefinition>) =>
     put<RoleDefinition>(`/auth/roles/${id}`, payload),
   deleteRole: (id: string) => del(`/auth/roles/${id}`),
 
   // ── Notifications ───────────────────────────────────────────────────
 
-  getInboxNotifications: () => get<InboxResponse>('/notification/inbox'),
-  clearInboxNotifications: () => del('/notification/inbox'),
+  getInboxNotifications: () => get<InboxResponse>("/notification/inbox"),
+  clearInboxNotifications: () => del("/notification/inbox"),
   markInboxRead: (notificationId: string) =>
     patch<InboxNotification>(`/notification/inbox/${notificationId}/read`),
   getNotificationTemplate: () =>
-    get<NotificationTemplate>('/notification/settings/template/request-access'),
+    get<NotificationTemplate>("/notification/settings/template/request-access"),
   updateNotificationTemplate: (payload: NotificationTemplate) =>
-    put<NotificationTemplate>('/notification/settings/template/request-access', payload),
+    put<NotificationTemplate>(
+      "/notification/settings/template/request-access",
+      payload,
+    ),
 
   // ── Translations ────────────────────────────────────────────────────
 
-  getTranslations: (locale = 'en') =>
+  getTranslations: (locale = "en") =>
     get<Record<string, string>>(`/translation/translations?locale=${locale}`),
   getAdminTranslations: () =>
-    get<TranslationEntry[]>('/translation/admin/translations'),
-  createTranslation: (payload: { key: string; values: Record<string, string> }) =>
-    post<TranslationEntry>('/translation/admin/translations', payload),
-  updateTranslation: (translationKey: string, payload: { values: Record<string, string> }) =>
+    get<TranslationEntry[]>("/translation/admin/translations"),
+  createTranslation: (payload: {
+    key: string;
+    values: Record<string, string>;
+  }) => post<TranslationEntry>("/translation/admin/translations", payload),
+  updateTranslation: (
+    translationKey: string,
+    payload: { values: Record<string, string> },
+  ) =>
     put<TranslationEntry>(
       `/translation/admin/translations/${encodeURIComponent(translationKey)}`,
       payload,
     ),
   deleteTranslation: (translationKey: string) =>
-    del(`/translation/admin/translations/${encodeURIComponent(translationKey)}`),
+    del(
+      `/translation/admin/translations/${encodeURIComponent(translationKey)}`,
+    ),
 
   // ── User profile ────────────────────────────────────────────────────
 
-  updateMyLanguage: (language: string) => patch('/auth/me', { language }),
+  updateMyLanguage: (language: string) => patch("/auth/me", { language }),
   updateMyDashboardLayout: (dashboardLayout: Record<string, unknown>) =>
-    patch('/auth/me', { dashboardLayout }),
+    patch("/auth/me", { dashboardLayout }),
 
   // ── Instance management ─────────────────────────────────────────────
 
   resolveInstanceBySubdomain: (subdomain: string) =>
-    get<Instance>(`/auth/instances/resolve?subdomain=${encodeURIComponent(subdomain)}`),
-  getMyInstances: () => get<Instance[]>('/auth/my-instances'),
+    get<Instance>(
+      `/auth/instances/resolve?subdomain=${encodeURIComponent(subdomain)}`,
+    ),
+  getMyInstances: () => get<Instance[]>("/auth/my-instances"),
 
   // ── Push tokens (new for mobile) ────────────────────────────────────
 
-  registerPushToken: (token: string, platform: 'ios' | 'android') =>
-    post('/notification/push-tokens', { token, platform }),
+  registerPushToken: (token: string, platform: "ios" | "android") =>
+    post("/notification/push-tokens", { token, platform }),
   unregisterPushToken: (token: string) =>
     del(`/notification/push-tokens/${encodeURIComponent(token)}`),
 

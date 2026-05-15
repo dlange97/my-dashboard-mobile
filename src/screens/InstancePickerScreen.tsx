@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,19 +6,20 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-} from 'react-native';
-import { useAuth } from '../context/AuthContext';
-import { useTranslation } from '../context/TranslationContext';
-import api from '../api/api';
-import type { Instance } from '../types';
-import { colors, borderRadius, fontSize, spacing, shadows } from '../theme';
+} from "react-native";
+import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "../context/TranslationContext";
+import api from "../api/api";
+import type { Instance } from "../types";
+import { colors, borderRadius, fontSize, spacing, shadows } from "../theme";
+import { PageHeader, ScreenBackdrop, SurfaceCard } from "../components/ui";
 
 export default function InstancePickerScreen() {
   const { selectInstance, logout } = useAuth();
   const { t } = useTranslation();
   const [instances, setInstances] = useState<Instance[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api
@@ -29,13 +30,17 @@ export default function InstancePickerScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>{t('instance.selectTitle', 'Select Instance')}</Text>
-        <Text style={styles.subtitle}>
-          {t('instance.selectSubtitle', 'Choose which dashboard to open')}
-        </Text>
+    <ScreenBackdrop contentStyle={styles.container} scrollable={false}>
+      <PageHeader
+        eyebrow={t("nav.brand", "My Dashboard")}
+        title={t("instance.selectTitle", "Select Instance")}
+        subtitle={t(
+          "instance.selectSubtitle",
+          "Choose which dashboard to open",
+        )}
+      />
 
+      <SurfaceCard style={styles.card}>
         {loading ? (
           <ActivityIndicator color={colors.primary} style={styles.loader} />
         ) : error ? (
@@ -51,11 +56,13 @@ export default function InstancePickerScreen() {
               >
                 <View style={styles.instanceIcon}>
                   <Text style={styles.instanceIconText}>
-                    {(item.name?.[0] ?? item.slug?.[0] ?? '?').toUpperCase()}
+                    {(item.name?.[0] ?? item.slug?.[0] ?? "?").toUpperCase()}
                   </Text>
                 </View>
                 <View style={styles.instanceInfo}>
-                  <Text style={styles.instanceName}>{item.name ?? item.slug}</Text>
+                  <Text style={styles.instanceName}>
+                    {item.name ?? item.slug}
+                  </Text>
                   <Text style={styles.instanceSlug}>{item.slug}</Text>
                 </View>
                 <Text style={styles.chevron}>›</Text>
@@ -63,57 +70,39 @@ export default function InstancePickerScreen() {
             )}
             ListEmptyComponent={
               <Text style={styles.empty}>
-                {t('instance.noInstances', 'No instances found.')}
+                {t("instance.noInstances", "No instances found.")}
               </Text>
             }
           />
         )}
 
         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <Text style={styles.logoutText}>{t('nav.logout', 'Logout')}</Text>
+          <Text style={styles.logoutText}>{t("nav.logout", "Logout")}</Text>
         </TouchableOpacity>
-      </View>
-    </View>
+      </SurfaceCard>
+    </ScreenBackdrop>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    padding: spacing.xxl,
+    justifyContent: "center",
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.xxl,
-    ...shadows.lg,
-  },
-  title: {
-    fontSize: fontSize.xxl,
-    fontWeight: '700',
-    color: colors.text,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginTop: spacing.xs,
-    marginBottom: spacing.xxl,
+    marginTop: spacing.sm,
   },
   loader: {
     marginVertical: spacing.xxl,
   },
   error: {
     color: colors.danger,
-    textAlign: 'center',
+    textAlign: "center",
     marginVertical: spacing.lg,
   },
   instanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
@@ -126,13 +115,13 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: spacing.md,
   },
   instanceIconText: {
     color: colors.textInverse,
-    fontWeight: '700',
+    fontWeight: "700",
     fontSize: fontSize.lg,
   },
   instanceInfo: {
@@ -140,7 +129,7 @@ const styles = StyleSheet.create({
   },
   instanceName: {
     fontSize: fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   instanceSlug: {
@@ -152,17 +141,17 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   empty: {
-    textAlign: 'center',
+    textAlign: "center",
     color: colors.textMuted,
     paddingVertical: spacing.xxl,
   },
   logoutBtn: {
     marginTop: spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
   },
   logoutText: {
     color: colors.danger,
     fontSize: fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

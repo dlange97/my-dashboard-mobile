@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,44 +6,48 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   TouchableOpacity,
-} from 'react-native';
-import { useAuth } from '../context/AuthContext';
-import { useTranslation } from '../context/TranslationContext';
-import api from '../api/api';
-import { Button } from '../components/ui';
-import { colors, borderRadius, fontSize, spacing, shadows } from '../theme';
+} from "react-native";
+import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "../context/TranslationContext";
+import api from "../api/api";
+import {
+  Button,
+  PageHeader,
+  ScreenBackdrop,
+  SurfaceCard,
+} from "../components/ui";
+import { colors, borderRadius, fontSize, spacing, shadows } from "../theme";
 
 export default function LoginScreen() {
   const { login } = useAuth();
   const { t } = useTranslation();
 
-  const [view, setView] = useState<'login' | 'request'>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [view, setView] = useState<"login" | "request">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [requestMessage, setRequestMessage] = useState('');
-  const [requestSuccess, setRequestSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestSuccess, setRequestSuccess] = useState("");
+  const [error, setError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [requestLoading, setRequestLoading] = useState(false);
 
   async function handleLogin() {
-    setError('');
-    setRequestSuccess('');
+    setError("");
+    setRequestSuccess("");
     setLoginLoading(true);
 
     try {
       const data = await api.login(email.trim(), password);
-      await login(data.token, data.user ?? { email } as any);
+      await login(data.token, data.user ?? ({ email } as any));
     } catch (err: unknown) {
       setError(
         err instanceof Error
           ? err.message
-          : t('login.networkError', 'Network error. Is the server running?'),
+          : t("login.networkError", "Network error. Is the server running?"),
       );
     } finally {
       setLoginLoading(false);
@@ -51,11 +55,16 @@ export default function LoginScreen() {
   }
 
   async function handleRequestAccess() {
-    setError('');
-    setRequestSuccess('');
+    setError("");
+    setRequestSuccess("");
 
     if (!email.trim()) {
-      setError(t('login.emailRequired', 'Enter your email before sending request access.'));
+      setError(
+        t(
+          "login.emailRequired",
+          "Enter your email before sending request access.",
+        ),
+      );
       return;
     }
 
@@ -67,16 +76,21 @@ export default function LoginScreen() {
         lastName: lastName.trim(),
         message: requestMessage.trim(),
       });
-      setRequestSuccess(t('login.requestSent', 'Request access sent. Admin will review your request.'));
-      setView('login');
-      setFirstName('');
-      setLastName('');
-      setRequestMessage('');
+      setRequestSuccess(
+        t(
+          "login.requestSent",
+          "Request access sent. Admin will review your request.",
+        ),
+      );
+      setView("login");
+      setFirstName("");
+      setLastName("");
+      setRequestMessage("");
     } catch (err: unknown) {
       setError(
         err instanceof Error
           ? err.message
-          : t('login.requestFailed', 'Failed to send request access.'),
+          : t("login.requestFailed", "Failed to send request access."),
       );
     } finally {
       setRequestLoading(false);
@@ -86,24 +100,38 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
+      <ScreenBackdrop
+        scrollProps={{ keyboardShouldPersistTaps: "handled" }}
+        contentStyle={styles.scroll}
       >
-        <View style={styles.card}>
-          {view === 'login' ? (
+        <PageHeader
+          eyebrow={t("nav.brand", "My Dashboard")}
+          title={
+            view === "login"
+              ? t("login.welcomeBack", "Welcome back")
+              : t("login.requestAccess", "Request Access")
+          }
+          subtitle={
+            view === "login"
+              ? t("login.subtitle", "Sign in to your account")
+              : t(
+                  "login.requestSubtitle",
+                  "Send your details to administrator for approval.",
+                )
+          }
+        />
+
+        <SurfaceCard style={styles.card}>
+          {view === "login" ? (
             <>
-              <Text style={styles.brand}>{t('nav.brand', 'My Dashboard')}</Text>
-              <Text style={styles.subtitle}>
-                {t('login.subtitle', 'Sign in to your account')}
-              </Text>
-
               {!!error && <Text style={styles.error}>{error}</Text>}
-              {!!requestSuccess && <Text style={styles.success}>{requestSuccess}</Text>}
+              {!!requestSuccess && (
+                <Text style={styles.success}>{requestSuccess}</Text>
+              )}
 
-              <Text style={styles.label}>{t('login.email', 'Email')}</Text>
+              <Text style={styles.label}>{t("login.email", "Email")}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
@@ -116,7 +144,9 @@ export default function LoginScreen() {
                 autoFocus
               />
 
-              <Text style={styles.label}>{t('login.password', 'Password')}</Text>
+              <Text style={styles.label}>
+                {t("login.password", "Password")}
+              </Text>
               <View style={styles.passwordRow}>
                 <TextInput
                   style={[styles.input, { flex: 1, marginBottom: 0 }]}
@@ -131,12 +161,18 @@ export default function LoginScreen() {
                   style={styles.eyeBtn}
                   onPress={() => setShowPassword((p) => !p)}
                 >
-                  <Text style={styles.eyeText}>{showPassword ? '🙈' : '👁️'}</Text>
+                  <Text style={styles.eyeText}>
+                    {showPassword ? "🙈" : "👁️"}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
               <Button
-                title={loginLoading ? t('login.signingIn', 'Signing in…') : t('login.signIn', 'Sign In')}
+                title={
+                  loginLoading
+                    ? t("login.signingIn", "Signing in…")
+                    : t("login.signIn", "Sign In")
+                }
                 onPress={handleLogin}
                 loading={loginLoading}
                 disabled={loginLoading || requestLoading}
@@ -144,32 +180,41 @@ export default function LoginScreen() {
               />
 
               <Button
-                title={t('login.requestAccess', 'Request Access')}
+                title={t("login.requestAccess", "Request Access")}
                 variant="secondary"
-                onPress={() => { setError(''); setRequestSuccess(''); setView('request'); }}
+                onPress={() => {
+                  setError("");
+                  setRequestSuccess("");
+                  setView("request");
+                }}
                 disabled={loginLoading || requestLoading}
                 style={styles.secondaryBtn}
               />
 
               <Text style={styles.footer}>
-                {t('login.footerNote', 'Account creation is managed by administrators.')}
+                {t(
+                  "login.footerNote",
+                  "Account creation is managed by administrators.",
+                )}
               </Text>
             </>
           ) : (
             <>
-              <View style={styles.requestHeader}>
-                <Text style={styles.brand}>{t('login.requestAccess', 'Request Access')}</Text>
-                <TouchableOpacity onPress={() => { setError(''); setView('login'); }}>
-                  <Text style={styles.backLink}>{t('login.backToLogin', '← Back to login')}</Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.subtitle}>
-                {t('login.requestSubtitle', 'Send your details to administrator for approval.')}
-              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setError("");
+                  setView("login");
+                }}
+                style={styles.backChip}
+              >
+                <Text style={styles.backLink}>
+                  {t("login.backToLogin", "← Back to login")}
+                </Text>
+              </TouchableOpacity>
 
               {!!error && <Text style={styles.error}>{error}</Text>}
 
-              <Text style={styles.label}>{t('login.email', 'Email')} *</Text>
+              <Text style={styles.label}>{t("login.email", "Email")} *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
@@ -182,7 +227,9 @@ export default function LoginScreen() {
 
               <View style={styles.row}>
                 <View style={styles.halfField}>
-                  <Text style={styles.label}>{t('login.firstName', 'First name')}</Text>
+                  <Text style={styles.label}>
+                    {t("login.firstName", "First name")}
+                  </Text>
                   <TextInput
                     style={styles.input}
                     placeholder="Jan"
@@ -192,7 +239,9 @@ export default function LoginScreen() {
                   />
                 </View>
                 <View style={styles.halfField}>
-                  <Text style={styles.label}>{t('login.lastName', 'Last name')}</Text>
+                  <Text style={styles.label}>
+                    {t("login.lastName", "Last name")}
+                  </Text>
                   <TextInput
                     style={styles.input}
                     placeholder="Kowalski"
@@ -203,7 +252,9 @@ export default function LoginScreen() {
                 </View>
               </View>
 
-              <Text style={styles.label}>{t('login.requestMessage', 'Message')}</Text>
+              <Text style={styles.label}>
+                {t("login.requestMessage", "Message")}
+              </Text>
               <TextInput
                 style={[styles.input, styles.textarea]}
                 placeholder="Write a short message…"
@@ -216,20 +267,24 @@ export default function LoginScreen() {
 
               <View style={styles.requestActions}>
                 <Button
-                  title={t('common.cancel', 'Cancel')}
+                  title={t("common.cancel", "Cancel")}
                   variant="secondary"
-                  onPress={() => setView('login')}
+                  onPress={() => setView("login")}
                 />
                 <Button
-                  title={requestLoading ? t('login.sending', 'Sending…') : t('login.sendRequest', 'Send Request')}
+                  title={
+                    requestLoading
+                      ? t("login.sending", "Sending…")
+                      : t("login.sendRequest", "Send Request")
+                  }
                   onPress={handleRequestAccess}
                   loading={requestLoading}
                 />
               </View>
             </>
           )}
-        </View>
-      </ScrollView>
+        </SurfaceCard>
+      </ScreenBackdrop>
     </KeyboardAvoidingView>
   );
 }
@@ -241,31 +296,14 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: spacing.xxl,
+    justifyContent: "center",
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.xxl,
-    ...shadows.lg,
-  },
-  brand: {
-    fontSize: fontSize.xxl,
-    fontWeight: '700',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xxl,
+    marginTop: spacing.sm,
   },
   label: {
     fontSize: fontSize.sm,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: spacing.xs,
     marginTop: spacing.md,
@@ -283,11 +321,11 @@ const styles = StyleSheet.create({
   },
   textarea: {
     minHeight: 80,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.sm,
     marginBottom: spacing.sm,
   },
@@ -304,49 +342,60 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   error: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: "#fef2f2",
     color: colors.danger,
     borderRadius: borderRadius.sm,
     padding: spacing.md,
     fontSize: fontSize.sm,
     marginBottom: spacing.md,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   success: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: "#f0fdf4",
     color: colors.success,
     borderRadius: borderRadius.sm,
     padding: spacing.md,
     fontSize: fontSize.sm,
     marginBottom: spacing.md,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   footer: {
     fontSize: fontSize.xs,
     color: colors.textMuted,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: spacing.lg,
   },
   requestHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: spacing.xs,
+  },
+  backChip: {
+    alignSelf: "flex-start",
+    marginBottom: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   backLink: {
     color: colors.primary,
     fontSize: fontSize.sm,
+    fontWeight: "700",
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.md,
   },
   halfField: {
     flex: 1,
   },
   requestActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     gap: spacing.sm,
     marginTop: spacing.lg,
   },

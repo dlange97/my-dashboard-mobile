@@ -17,8 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.mydashboard.mobile",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "We need your location to show you on the map.",
-        "NSLocationAlwaysUsageDescription": "We need your location to show you on the map."
+        "NSLocationWhenInUseUsageDescription": "We need your location to show you on the map."
       }
     },
     "android": {
@@ -28,10 +27,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.mydashboard.mobile",
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
-      ]
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "web": {
       "favicon": "./assets/favicon.png"

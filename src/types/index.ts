@@ -58,6 +58,19 @@ export interface ShoppingList {
   createdAt: string;
 }
 
+// ── Notes ───────────────────────────────────────────────────────────────
+
+export interface Note {
+  id: number;
+  title: string;
+  content: string;
+  color?: string;
+  ownerId: string;
+  sharedWithUserIds?: string[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
 // ── Events ──────────────────────────────────────────────────────────────
 
 export interface EventLocation {
@@ -81,7 +94,11 @@ export interface MapRoute {
   id: string;
   name: string;
   eventId: string | null;
-  coordinates: Array<{ lat: number; lng: number }>;
+  color?: string;
+  /** GeoJSON object as stored/returned by the backend (FeatureCollection or Feature with LineString geometry). */
+  geoJson?: Record<string, unknown>;
+  /** Legacy flat coordinate array — used in tests and older API versions. Falls back when geoJson is absent. */
+  coordinates?: Array<{ lat: number; lng: number }>;
 }
 
 export interface MapPoint {

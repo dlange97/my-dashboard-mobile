@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   StyleSheet,
   Alert,
   RefreshControl,
-} from 'react-native';
-import { useAuth } from '../context/AuthContext';
-import { useTranslation } from '../context/TranslationContext';
-import api from '../api/api';
-import { Button, Pagination, ShareUserModal } from '../components/ui';
-import { colors, borderRadius, fontSize, spacing, shadows } from '../theme';
-import type { TodoItem } from '../types';
+} from "react-native";
+import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "../context/TranslationContext";
+import api from "../api/api";
+import { Button, Pagination, ShareUserModal } from "../components/ui";
+import { colors, borderRadius, fontSize, spacing, shadows } from "../theme";
+import type { TodoItem } from "../types";
 
 const PAGE_SIZE = 10;
 
@@ -31,12 +31,12 @@ export default function TodosScreen() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // New todo form
   const [showForm, setShowForm] = useState(false);
-  const [newText, setNewText] = useState('');
-  const [newDueDate, setNewDueDate] = useState('');
+  const [newText, setNewText] = useState("");
+  const [newDueDate, setNewDueDate] = useState("");
 
   // Share
   const [shareTarget, setShareTarget] = useState<TodoItem | null>(null);
@@ -45,15 +45,17 @@ export default function TodosScreen() {
     try {
       const data = await api.getTodos();
       setTodos(data ?? []);
-      setError('');
+      setError("");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load');
+      setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -64,13 +66,19 @@ export default function TodosScreen() {
   const addTodo = async () => {
     if (!newText.trim()) return;
     try {
-      const created = await api.createTodo({ text: newText.trim(), dueDate: newDueDate || null });
+      const created = await api.createTodo({
+        text: newText.trim(),
+        dueDate: newDueDate || null,
+      });
       setTodos((prev) => [...prev, created]);
-      setNewText('');
-      setNewDueDate('');
+      setNewText("");
+      setNewDueDate("");
       setShowForm(false);
     } catch (err: unknown) {
-      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to create todo');
+      Alert.alert(
+        "Error",
+        err instanceof Error ? err.message : "Failed to create todo",
+      );
     }
   };
 
@@ -79,25 +87,31 @@ export default function TodosScreen() {
       const updated = await api.toggleTodo(item.id);
       setTodos((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
     } catch (err: unknown) {
-      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to toggle');
+      Alert.alert(
+        "Error",
+        err instanceof Error ? err.message : "Failed to toggle",
+      );
     }
   };
 
   const deleteTodo = (item: TodoItem) => {
     Alert.alert(
-      t('common.confirmDelete', 'Delete'),
-      t('todo.confirmDelete', 'Delete this task?'),
+      t("common.confirmDelete", "Delete"),
+      t("todo.confirmDelete", "Delete this task?"),
       [
-        { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+        { text: t("common.cancel", "Cancel"), style: "cancel" },
         {
-          text: t('common.delete', 'Delete'),
-          style: 'destructive',
+          text: t("common.delete", "Delete"),
+          style: "destructive",
           onPress: async () => {
             try {
               await api.deleteTodo(item.id);
               setTodos((prev) => prev.filter((t) => t.id !== item.id));
             } catch (err: unknown) {
-              Alert.alert('Error', err instanceof Error ? err.message : 'Failed');
+              Alert.alert(
+                "Error",
+                err instanceof Error ? err.message : "Failed",
+              );
             }
           },
         },
@@ -112,7 +126,10 @@ export default function TodosScreen() {
       setTodos((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
       setShareTarget(null);
     } catch (err: unknown) {
-      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to share');
+      Alert.alert(
+        "Error",
+        err instanceof Error ? err.message : "Failed to share",
+      );
     }
   };
 
@@ -129,8 +146,11 @@ export default function TodosScreen() {
 
   const renderItem = ({ item }: { item: TodoItem }) => (
     <View style={styles.todoRow}>
-      <TouchableOpacity style={styles.checkbox} onPress={() => toggleTodo(item)}>
-        <Text style={styles.checkboxText}>{item.done ? '☑' : '☐'}</Text>
+      <TouchableOpacity
+        style={styles.checkbox}
+        onPress={() => toggleTodo(item)}
+      >
+        <Text style={styles.checkboxText}>{item.done ? "☑" : "☐"}</Text>
       </TouchableOpacity>
       <View style={styles.todoInfo}>
         <Text style={[styles.todoText, item.done && styles.todoDone]}>
@@ -156,17 +176,21 @@ export default function TodosScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('todo.title', 'To-Do')}</Text>
-        <TouchableOpacity onPress={() => setShowForm((s) => !s)}>
-          <Text style={styles.addBtn}>+</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>{t("todo.title", "To-Do")}</Text>
       </View>
+
+      <TouchableOpacity
+        style={styles.addBtnRow}
+        onPress={() => setShowForm((s) => !s)}
+      >
+        <Text style={styles.addBtnText}>＋ {t("todo.add", "Add Task")}</Text>
+      </TouchableOpacity>
 
       {showForm && (
         <View style={styles.form}>
           <TextInput
             style={styles.input}
-            placeholder={t('todo.placeholder', 'What needs to be done?')}
+            placeholder={t("todo.placeholder", "What needs to be done?")}
             placeholderTextColor={colors.textMuted}
             value={newText}
             onChangeText={setNewText}
@@ -174,38 +198,53 @@ export default function TodosScreen() {
           />
           <TextInput
             style={styles.input}
-            placeholder={t('todo.dueDatePlaceholder', 'Due date (YYYY-MM-DD)')}
+            placeholder={t("todo.dueDatePlaceholder", "Due date (YYYY-MM-DD)")}
             placeholderTextColor={colors.textMuted}
             value={newDueDate}
             onChangeText={setNewDueDate}
           />
           <View style={styles.formActions}>
-            <Button title={t('common.cancel', 'Cancel')} variant="secondary" size="sm" onPress={() => setShowForm(false)} />
-            <Button title={t('todo.add', 'Add')} size="sm" onPress={addTodo} />
+            <Button
+              title={t("common.cancel", "Cancel")}
+              variant="secondary"
+              size="sm"
+              onPress={() => setShowForm(false)}
+            />
+            <Button title={t("todo.add", "Add")} size="sm" onPress={addTodo} />
           </View>
         </View>
       )}
 
       {loading ? (
-        <Text style={styles.statusText}>{t('common.loading', 'Loading…')}</Text>
+        <Text style={styles.statusText}>{t("common.loading", "Loading…")}</Text>
       ) : error ? (
-        <Text style={[styles.statusText, { color: colors.danger }]}>{error}</Text>
+        <Text style={[styles.statusText, { color: colors.danger }]}>
+          {error}
+        </Text>
       ) : (
         <FlatList
           data={paged}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-          ListEmptyComponent={
-            <Text style={styles.statusText}>{t('todo.empty', 'No tasks')}</Text>
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
-          ListFooterComponent={<Pagination page={page} totalPages={totalPages} onPageChange={setPage} />}
+          ListEmptyComponent={
+            <Text style={styles.statusText}>{t("todo.empty", "No tasks")}</Text>
+          }
+          ListFooterComponent={
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          }
         />
       )}
 
       <ShareUserModal
         visible={!!shareTarget}
-        title={t('todo.shareTitle', 'Share task')}
+        title={t("todo.shareTitle", "Share task")}
         currentUserId={user?.id}
         alreadySharedUserIds={shareTarget?.sharedWithUserIds ?? []}
         onClose={() => setShareTarget(null)}
@@ -221,9 +260,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: spacing.lg,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
@@ -231,13 +270,22 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: fontSize.xl,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
   },
-  addBtn: {
-    fontSize: 28,
-    color: colors.primary,
-    fontWeight: '700',
+  addBtnRow: {
+    alignSelf: "center",
+    marginVertical: spacing.md,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxl,
+    ...shadows.sm,
+  },
+  addBtnText: {
+    color: "#fff",
+    fontSize: fontSize.md,
+    fontWeight: "700",
   },
   form: {
     padding: spacing.lg,
@@ -256,19 +304,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   formActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     gap: spacing.sm,
   },
   statusText: {
-    textAlign: 'center',
+    textAlign: "center",
     color: colors.textMuted,
     paddingVertical: spacing.xxl,
     fontSize: fontSize.md,
   },
   todoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
@@ -289,7 +337,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   todoDone: {
-    textDecorationLine: 'line-through',
+    textDecorationLine: "line-through",
     color: colors.textMuted,
   },
   todoDue: {
@@ -298,7 +346,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   todoActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.md,
   },
   actionIcon: {

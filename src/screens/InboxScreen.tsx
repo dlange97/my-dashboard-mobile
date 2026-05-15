@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,21 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-} from 'react-native';
-import { useInbox } from '../context/InboxContext';
-import { useTranslation } from '../context/TranslationContext';
-import { colors, spacing, fontSize, borderRadius, shadows } from '../theme';
-import type { InboxNotification } from '../types';
+} from "react-native";
+import { useInbox } from "../context/InboxContext";
+import { useTranslation } from "../context/TranslationContext";
+import { colors, spacing, fontSize, borderRadius, shadows } from "../theme";
+import type { InboxNotification } from "../types";
 
 export default function InboxScreen() {
-  const { items: notifications, unreadCount, loading, loadInbox: refresh, markRead, clearAll } = useInbox();
+  const {
+    items: notifications,
+    unreadCount,
+    loading,
+    loadInbox: refresh,
+    markRead,
+    clearAll,
+  } = useInbox();
   const { t } = useTranslation();
 
   const handlePress = useCallback(
@@ -23,16 +30,16 @@ export default function InboxScreen() {
         markRead(item);
       }
     },
-    [markAsRead],
+    [markRead],
   );
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -44,7 +51,10 @@ export default function InboxScreen() {
     >
       <View style={styles.cardHeader}>
         {!item.readAt && <View style={styles.unreadDot} />}
-        <Text style={[styles.cardTitle, !item.readAt && styles.unreadTitle]} numberOfLines={1}>
+        <Text
+          style={[styles.cardTitle, !item.readAt && styles.unreadTitle]}
+          numberOfLines={1}
+        >
           {item.title}
         </Text>
       </View>
@@ -60,14 +70,14 @@ export default function InboxScreen() {
       {/* Header bar */}
       <View style={styles.headerBar}>
         <Text style={styles.headerTitle}>
-          {t('inbox.title', 'Inbox')}{' '}
-          {unreadCount > 0 && (
-            <Text style={styles.badge}>({unreadCount})</Text>
-          )}
+          {t("inbox.title", "Inbox")}{" "}
+          {unreadCount > 0 && <Text style={styles.badge}>({unreadCount})</Text>}
         </Text>
         {notifications.length > 0 && (
           <TouchableOpacity onPress={clearAll}>
-            <Text style={styles.clearBtn}>{t('inbox.clearAll', 'Clear all')}</Text>
+            <Text style={styles.clearBtn}>
+              {t("inbox.clearAll", "Clear all")}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -79,7 +89,9 @@ export default function InboxScreen() {
       ) : notifications.length === 0 ? (
         <View style={styles.center}>
           <Text style={styles.emptyIcon}>📭</Text>
-          <Text style={styles.emptyText}>{t('inbox.empty', 'No notifications')}</Text>
+          <Text style={styles.emptyText}>
+            {t("inbox.empty", "No notifications")}
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -87,7 +99,9 @@ export default function InboxScreen() {
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} />}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={refresh} />
+          }
         />
       )}
     </View>
@@ -100,9 +114,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   headerBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     backgroundColor: colors.surface,
@@ -110,22 +124,22 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: fontSize.xl,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
   },
   badge: {
     color: colors.primary,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   clearBtn: {
     fontSize: fontSize.sm,
     color: colors.danger,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyIcon: {
     fontSize: 48,
@@ -150,8 +164,8 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.primary,
   },
   cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: spacing.xs,
   },
   unreadDot: {
@@ -163,12 +177,12 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     flex: 1,
   },
   unreadTitle: {
-    fontWeight: '700',
+    fontWeight: "700",
   },
   cardBody: {
     fontSize: fontSize.sm,

@@ -1,4 +1,4 @@
-import type { NavigatorScreenParams } from '@react-navigation/native';
+import type { NavigatorScreenParams } from "@react-navigation/native";
 
 // ── Auth Stack (unauthenticated) ────────────────────────────────────────
 export type AuthStackParamList = {
@@ -27,9 +27,11 @@ export type MoreStackParamList = {
   Calendar: undefined;
   Map: undefined;
   Inbox: undefined;
+  Notes: { noteId?: number } | undefined;
   Users: undefined;
   UserManagement: undefined;
   Settings: undefined;
+  Profile: undefined;
 };
 
 // ── Root Stack ──────────────────────────────────────────────────────────
