@@ -328,6 +328,15 @@ export const api = {
     get<{ valid: boolean; email?: string }>(`/auth/checkout/${hash}/validate`),
   completeCheckout: (hash: string, payload: Record<string, unknown>) =>
     post<LoginResponse>(`/auth/checkout/${hash}`, payload),
+
+  // ── Invite / Set password ───────────────────────────────────────────
+
+  validateInvite: (token: string) =>
+    get<{ valid: boolean; email?: string; reason?: string }>(
+      `/auth/invite/${encodeURIComponent(token)}/validate`,
+    ),
+  acceptInvite: (token: string, password: string) =>
+    post(`/auth/invite/${encodeURIComponent(token)}`, { password }),
 };
 
 export default api;
