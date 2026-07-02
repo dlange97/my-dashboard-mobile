@@ -1,13 +1,14 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useAuth } from '../context/AuthContext';
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useAuth } from "../context/AuthContext";
 
-import LoginScreen from '../screens/LoginScreen';
-import CheckoutScreen from '../screens/CheckoutScreen';
-import InstancePickerScreen from '../screens/InstancePickerScreen';
-import MainTabNavigator from './MainTabNavigator';
+import LoginScreen from "../screens/LoginScreen";
+import CheckoutScreen from "../screens/CheckoutScreen";
+import SetPasswordScreen from "../screens/SetPasswordScreen";
+import InstancePickerScreen from "../screens/InstancePickerScreen";
+import MainTabNavigator from "./MainTabNavigator";
 
-import type { AuthStackParamList, RootStackParamList } from './types';
+import type { AuthStackParamList, RootStackParamList } from "./types";
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -17,6 +18,7 @@ function AuthNavigator() {
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Checkout" component={CheckoutScreen} />
+      <AuthStack.Screen name="SetPassword" component={SetPasswordScreen} />
     </AuthStack.Navigator>
   );
 }
@@ -27,7 +29,10 @@ function AppNavigator() {
   return (
     <RootStack.Navigator screenOptions={{ headerShown: false }}>
       {needsInstanceSelection ? (
-        <RootStack.Screen name="InstancePicker" component={InstancePickerScreen} />
+        <RootStack.Screen
+          name="InstancePicker"
+          component={InstancePickerScreen}
+        />
       ) : (
         <RootStack.Screen name="MainTabs" component={MainTabNavigator} />
       )}
