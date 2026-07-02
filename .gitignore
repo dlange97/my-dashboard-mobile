@@ -42,3 +42,9 @@ yarn-error.*
 
 # IDE cache (JetBrains)
 .idea/caches/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env*.example
